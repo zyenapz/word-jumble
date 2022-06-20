@@ -3,6 +3,10 @@ name = "jumble"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["zyenapz <zyenapz@gmail.com>"]
+description = "A CLI-based game of Jumble written in Rust"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rand = "0.8.4"
