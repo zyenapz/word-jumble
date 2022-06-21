@@ -1,6 +1,6 @@
 use difficulty::Difficulty;
 use game_data::SessionData;
-use words::Word;
+use word::Word;
 
 fn jumble_word(word: &String) {
     let word_length: usize = word.len();
@@ -18,6 +18,18 @@ fn main() {
             jumbled_form: "SDAS".to_string(),
         }],
     };
+
+    let mut is_running: bool = true;
+
+    while is_running {
+        /* Display welcome screen and options
+        TODO:
+        1. Add welcome and title texts
+        2. Add options (Play, Scores, Quit)
+        3. Add attributions info at the bottom
+        4. Add a way to get the user input
+        */
+    }
 }
 
 mod difficulty {
@@ -40,7 +52,7 @@ mod difficulty {
     }
 }
 
-mod words {
+mod word {
     pub struct Word {
         pub(crate) normal_form: String,
         pub(crate) jumbled_form: String,
@@ -48,7 +60,7 @@ mod words {
 }
 
 mod game_data {
-    use crate::{difficulty::Difficulty, words::Word};
+    use crate::{difficulty::Difficulty, word::Word};
 
     pub mod game_constants {
         pub const QUESTIONS_PER_GAME: u8 = 15;
