@@ -10,3 +10,4 @@ description = "A CLI-based game of Jumble written in Rust"
 
 [dependencies]
 rand = "0.8.4"
+shuffle = "0.1.7"

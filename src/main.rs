@@ -1,30 +1,56 @@
 use std::io;
 use std::io::Write;
 
+use shuffle::irs::Irs;
+use shuffle::shuffler::Shuffler;
+
 fn main() {
     let mut is_running: bool = true;
     let mut action: String = String::new();
+    let mut state: Scene = Scene::Menu;
 
     while is_running {
-        /* Display welcome screen and options
-        TODO:
-        1. Add welcome and title texts
-        2. Add options (Play, Scores, Quit)
-        3. Add attributions info at the bottom
-        4. Add a way to get the user input
-        */
+        action = String::new();
 
-        display_title();
-        display_options();
+        match state {
+            Scene::Menu => {
+                display_title();
+                display_options();
 
-        io::stdin()
-            .read_line(&mut action)
-            .expect("Error getting input");
+                io::stdin()
+                    .read_line(&mut action)
+                    .expect("Error getting input");
 
-        is_running = false;
+                match &action.trim()[..] {
+                    "1" => state = Scene::Play,
+                    "2" => state = Scene::Scores,
+                    "3" => state = Scene::Quit,
+                    _ => println!("Invalid"),
+                }
+            }
+            Scene::Play => {
+                // let jumbled = jumble_word(&String::from("Hello"));
+                // println!("{}", jumbled);
+                todo!();
+            }
+            Scene::Scores => {
+                todo!();
+            }
+            Scene::Quit => {
+                println!("Thanks for playing!");
+                is_running = false;
+            }
+        }
     }
 }
 
+#[derive(PartialEq)]
+enum Scene {
+    Menu,
+    Play,
+    Scores,
+    Quit,
+}
 struct Word {
     pub(crate) normal_form: String,
     pub(crate) jumbled_form: String,
@@ -46,9 +72,18 @@ fn display_options() {
 }
 
 fn jumble_word(word: &String) -> String {
-    let word_length: usize = word.len();
-
     let mut jumbled: String = String::from("");
+
+    let mut unjumbled: Vec<char> = word.chars().collect();
+    let mut rng = rand::thread_rng();
+    let mut irs = Irs::default();
+
+    match irs.shuffle(&mut unjumbled, &mut rng) {
+        Ok(_) => jumbled = unjumbled.into_iter().collect(),
+        Err(_) => {
+            println!("\n[Error]: something went wrong when shuffling the word.\n");
+        }
+    }
 
     return jumbled;
     // TODO
