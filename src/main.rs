@@ -1,3 +1,5 @@
+mod sets;
+
 use std::io;
 use std::io::Write;
 
@@ -36,6 +38,9 @@ fn main() {
             Scene::Scores => {
                 todo!();
             }
+            Scene::Help => {
+                todo!();
+            }
             Scene::Quit => {
                 println!("Thanks for playing!");
                 is_running = false;
@@ -48,9 +53,34 @@ fn main() {
 enum Scene {
     Menu,
     Play,
+    Help,
     Scores,
     Quit,
 }
+
+#[derive(PartialEq)]
+enum WordTheme {
+    SolarSystem,
+    FarmAnimals,
+    Seafoods,
+    ChemicalElements,
+    WorldCountries,
+    USStateCapitals,
+}
+
+impl WordTheme {
+    fn get_wordset(&self) -> &[&str] {
+        match &self {
+            WordTheme::SolarSystem => sets::word_sets::ws_solar_system,
+            WordTheme::FarmAnimals => sets::word_sets::ws_farm_animals,
+            WordTheme::Seafoods => sets::word_sets::ws_seafoods,
+            WordTheme::ChemicalElements => sets::word_sets::ws_chemical_elements,
+            WordTheme::WorldCountries => sets::word_sets::ws_world_countries,
+            WordTheme::USStateCapitals => sets::word_sets::ws_state_capitals,
+        }
+    }
+}
+
 struct Word {
     pub(crate) normal_form: String,
     pub(crate) jumbled_form: String,
