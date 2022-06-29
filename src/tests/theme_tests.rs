@@ -69,7 +69,7 @@ fn test_countries_input() {
 
 #[test]
 fn test_invalid_input() {
-    let t1: Result<Theme, io::Error> = Theme::new("hello world");
+    let t1: Result<Theme, io::Error> = Theme::new("webs");
 
     assert!(t1.is_err());
 }
