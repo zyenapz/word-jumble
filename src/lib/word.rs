@@ -1,6 +1,6 @@
 use std::io;
 
-use rand::rngs::mock::StepRng;
+use rand::RngCore;
 use shuffle::{irs::Irs, shuffler::Shuffler};
 
 const MAX_WORD_LENGTH: u8 = 15;
@@ -18,7 +18,7 @@ pub(crate) struct Word {
 }
 
 impl Word {
-    pub fn new(normal_word: String, rng: &mut StepRng) -> Result<Word, io::Error> {
+    pub fn new(normal_word: String, rng: &mut dyn RngCore) -> Result<Word, io::Error> {
         match is_alphabetic!(normal_word.clone()) && normal_word.len() <= MAX_WORD_LENGTH.into() {
             true => {
                 let mut irs = Irs::default();
@@ -33,7 +33,7 @@ impl Word {
                     normal: normal_word.to_string(),
                     jumbled: match std::str::from_utf8(&data) {
                         Ok(r) => r.to_string(),
-                        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+                        Err(e) => panic!("Invalid UTF-8 sequence: {}!", e),
                     },
                 })
             }
@@ -45,6 +45,21 @@ impl Word {
                 ),
             )),
         }
+    }
+
+    pub fn jumble_word(&mut self, rng: &mut dyn RngCore) {
+        let mut irs = Irs::default();
+
+        let nw_clone = self.jumbled.clone();
+        let mut data = nw_clone.into_bytes();
+
+        irs.shuffle(&mut data, rng)
+            .expect("Error encounterd when shuffling!");
+
+        self.jumbled = match std::str::from_utf8(&data) {
+            Ok(r) => r.to_string(),
+            Err(e) => panic!("Invalid UTF-8 sequence: {}!", e),
+        };
     }
 
     pub fn get_normal_form(&self) -> &String {
