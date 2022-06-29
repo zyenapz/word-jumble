@@ -1,120 +1,16 @@
-mod sets;
+mod lib;
 
-use std::io;
-use std::io::Write;
+#[cfg(test)]
+mod tests;
 
-use shuffle::irs::Irs;
-use shuffle::shuffler::Shuffler;
+use rand::rngs::mock::StepRng;
+
+use crate::lib::word::Word;
 
 fn main() {
-    let mut is_running: bool = true;
-    let mut action: String = String::new();
-    let mut state: Scene = Scene::Menu;
+    let mut rng = StepRng::new(1, 10);
+    let w1 = Word::new("JUPITER".to_string(), &mut rng).unwrap();
 
-    while is_running {
-        action = String::new();
-
-        match state {
-            Scene::Menu => {
-                display_title();
-                display_options();
-
-                io::stdin()
-                    .read_line(&mut action)
-                    .expect("Error getting input");
-
-                match &action.trim()[..] {
-                    "1" => state = Scene::Play,
-                    "2" => state = Scene::Scores,
-                    "3" => state = Scene::Quit,
-                    _ => println!("Invalid"),
-                }
-            }
-            Scene::Play => {
-                // let jumbled = jumble_word(&String::from("Hello"));
-                // println!("{}", jumbled);
-                todo!();
-            }
-            Scene::Scores => {
-                todo!();
-            }
-            Scene::Help => {
-                todo!();
-            }
-            Scene::Quit => {
-                println!("Thanks for playing!");
-                is_running = false;
-            }
-        }
-    }
-}
-
-#[derive(PartialEq)]
-enum Scene {
-    Menu,
-    Play,
-    Help,
-    Scores,
-    Quit,
-}
-
-#[derive(PartialEq)]
-enum WordTheme {
-    SolarSystem,
-    FarmAnimals,
-    Seafoods,
-    ChemicalElements,
-    WorldCountries,
-    USStateCapitals,
-}
-
-impl WordTheme {
-    fn get_wordset(&self) -> &[&str] {
-        match &self {
-            WordTheme::SolarSystem => sets::word_sets::ws_solar_system,
-            WordTheme::FarmAnimals => sets::word_sets::ws_farm_animals,
-            WordTheme::Seafoods => sets::word_sets::ws_seafoods,
-            WordTheme::ChemicalElements => sets::word_sets::ws_chemical_elements,
-            WordTheme::WorldCountries => sets::word_sets::ws_world_countries,
-            WordTheme::USStateCapitals => sets::word_sets::ws_state_capitals,
-        }
-    }
-}
-
-struct Word {
-    pub(crate) normal_form: String,
-    pub(crate) jumbled_form: String,
-}
-
-fn display_title() {
-    println!("Jumble Rust!");
-    println!("------------------------");
-    println!("Version 1.0 | by zyenapz\n");
-}
-
-fn display_options() {
-    println!("Select option no.:");
-    println!("[1] Play");
-    println!("[1] Hi-score");
-    println!("[3] Exit");
-    print!("> ");
-    io::stdout().flush().unwrap();
-}
-
-fn jumble_word(word: &String) -> String {
-    let mut jumbled: String = String::from("");
-
-    let mut unjumbled: Vec<char> = word.chars().collect();
-    let mut rng = rand::thread_rng();
-    let mut irs = Irs::default();
-
-    match irs.shuffle(&mut unjumbled, &mut rng) {
-        Ok(_) => jumbled = unjumbled.into_iter().collect(),
-        Err(_) => {
-            println!("\n[Error]: something went wrong when shuffling the word.\n");
-        }
-    }
-
-    return jumbled;
-    // TODO
+    println!("{}", w1.get_jumbled_form());
+    println!("{}", w1.get_normal_form());
 }
