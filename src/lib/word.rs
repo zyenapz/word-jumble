@@ -3,7 +3,7 @@ use std::io;
 use rand::RngCore;
 use shuffle::{irs::Irs, shuffler::Shuffler};
 
-const MAX_WORD_LENGTH: u8 = 15;
+const MAX_WORD_LENGTH: u8 = 30;
 
 macro_rules! is_alphabetic {
     ($str: expr) => {

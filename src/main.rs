@@ -3,7 +3,11 @@ mod lib;
 #[cfg(test)]
 mod tests;
 
-use crate::lib::{theme::Theme, word::Word};
+use crate::lib::{
+    game_state::{Credits, Menu, State},
+    theme::Theme,
+    word::Word,
+};
 
 fn main() {
     let mut rng = rand::thread_rng();
@@ -22,5 +26,18 @@ fn main() {
 
     for e in z {
         println!("{} . {}", e.get_normal_form(), e.get_jumbled_form());
+    }
+
+    let mut is_running: bool = true;
+    let mut state: Box<dyn State> = Box::new(Menu);
+
+    while is_running {
+        state.run();
+
+        state = Box::new(Credits);
+
+        state.run();
+
+        is_running = false;
     }
 }

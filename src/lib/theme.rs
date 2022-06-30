@@ -18,7 +18,7 @@ pub(crate) enum Theme {
 
 impl Theme {
     pub fn new(input_string: &str) -> Result<Theme, io::Error> {
-        match input_string.to_lowercase().as_str() {
+        match input_string.trim().to_lowercase().as_str() {
             "1" | "s" | "space" => Ok(Theme::Space),
             "2" | "f" | "food" => Ok(Theme::Food),
             "3" | "w" | "websites" => Ok(Theme::Websites),
