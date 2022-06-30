@@ -1,8 +1,6 @@
-use std::io;
-
 use rand::rngs::mock::StepRng;
 
-use crate::Word;
+use crate::lib::word::Word;
 
 #[test]
 pub fn test_new_word() {

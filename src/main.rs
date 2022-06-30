@@ -3,41 +3,42 @@ mod lib;
 #[cfg(test)]
 mod tests;
 
-use crate::lib::{
-    game_state::{Credits, Menu, State},
-    theme::Theme,
-    word::Word,
-};
+use lib::game_state::Game;
+
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    let mut w1 = Word::new("JUPITER".to_string(), &mut rng).unwrap();
+    let mut game = Game::new();
 
-    println!("{}", w1.get_jumbled_form());
-    w1.jumble_word(&mut rng);
-    println!("{}", w1.get_jumbled_form());
+    game.run();
 
-    println!("Hello!!");
+    // let mut rng = rand::thread_rng();
+    // let mut w1 = Word::new("JUPITER".to_string(), &mut rng).unwrap();
 
-    let x = Theme::new("s").unwrap();
-    let z = x.get_word(&mut rng);
+    // println!("{}", w1.get_jumbled_form());
+    // w1.jumble_word(&mut rng);
+    // println!("{}", w1.get_jumbled_form());
 
-    println!("Len is: {}", z.len());
+    // println!("Hello!!");
 
-    for e in z {
-        println!("{} . {}", e.get_normal_form(), e.get_jumbled_form());
-    }
+    // let x = Theme::new("s").unwrap();
+    // let z = x.get_word(&mut rng);
 
-    let mut is_running: bool = true;
-    let mut state: Box<dyn State> = Box::new(Menu);
+    // println!("Len is: {}", z.len());
 
-    while is_running {
-        state.run();
+    // for e in z {
+    //     println!("{} . {}", e.get_normal_form(), e.get_jumbled_form());
+    // }
 
-        state = Box::new(Credits);
+    // let mut is_running: bool = true;
+    // let mut state: Box<dyn State> = Box::new(Menu);
 
-        state.run();
+    // while is_running {
+    //     state.run();
 
-        is_running = false;
-    }
+    //     state = Box::new(Credits);
+
+    //     state.run();
+
+    //     is_running = false;
+    // }
 }
