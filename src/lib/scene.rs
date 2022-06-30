@@ -1,30 +1,6 @@
 use std::io;
 
-pub struct Game {
-    scene: Option<Box<dyn Scene>>,
-    data: GameData,
-}
-
-pub struct GameData {
-    is_running: bool,
-}
-
-impl Game {
-    pub fn new() -> Game {
-        Game {
-            scene: Some(Box::new(Menu)),
-            data: GameData { is_running: true },
-        }
-    }
-
-    pub fn run(&mut self) {
-        while self.data.is_running {
-            if let Some(s) = self.scene.take() {
-                self.scene = Some(s.handle(&mut self.data))
-            }
-        }
-    }
-}
+use super::game_data::GameData;
 
 pub trait Scene {
     fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene>;
@@ -76,7 +52,7 @@ impl Scene for Credits {
 impl Scene for Exit {
     fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene> {
         println!("Exit");
-        data.is_running = false;
+        data.set_running_to_inactive();
         self
     }
 }
