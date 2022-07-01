@@ -1,18 +1,18 @@
 use super::{
-    game_data::GameData,
+    persistent_data::PersistentData,
     scene::{Menu, Scene},
 };
 
 pub struct Game {
     scene: Option<Box<dyn Scene>>,
-    data: GameData,
+    data: PersistentData,
 }
 
 impl Game {
     pub fn new() -> Game {
         Game {
             scene: Some(Box::new(Menu)),
-            data: GameData::new(),
+            data: PersistentData::new(),
         }
     }
 

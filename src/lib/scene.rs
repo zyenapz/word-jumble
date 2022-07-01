@@ -3,9 +3,15 @@ use std::{
     ops::Add,
 };
 
-use crate::lib::menu_command::MenuCommand;
+use crate::lib::command::{ExitCommand, MenuCommand};
 
-use super::game_data::GameData;
+use super::persistent_data::PersistentData;
+
+fn display_notice(msg: &str) {
+    if !msg.is_empty() {
+        println!(": {}", msg);
+    }
+}
 
 macro_rules! clear_console {
     () => {
@@ -14,27 +20,84 @@ macro_rules! clear_console {
 }
 
 pub trait Scene {
-    fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene>;
+    fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene>;
 }
 
 pub struct Menu;
 pub struct Play;
-pub struct Credits;
+pub struct Scores;
 pub struct Exit;
 
 impl Scene for Menu {
-    fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene> {
+    fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene> {
         let mut is_active = true;
         let mut next_state: Box<dyn Scene> = self;
         let mut error_message = String::new();
 
         while is_active {
             clear_console!();
-            println!("Welcome to Word Jumble!!");
+            println!("Welcome to Word Jumble!");
             println!("[1] Play");
             println!("[2] Credits");
             println!("[3] Exit");
-            println!("{}", error_message);
+            display_notice(error_message.as_str());
+
+            print!("> ");
+            io::stdout()
+                .flush()
+                .expect("Error encountered when flushing output!");
+
+            let mut buf = String::new();
+            io::stdin()
+                .read_line(&mut buf)
+                .expect("Error encountered when getting input!");
+
+            match MenuCommand::new(&buf) {
+                Ok(cmd) => {
+                    match cmd {
+                        MenuCommand::Play => next_state = Box::new(Play),
+                        MenuCommand::Scores => next_state = Box::new(Scores),
+                        MenuCommand::Exit => next_state = Box::new(Exit),
+                    }
+                    is_active = false
+                }
+                Err(e) => error_message = String::from(format!("{}", e)),
+            }
+        }
+
+        next_state
+    }
+}
+
+impl Scene for Play {
+    fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene> {
+        println!("Play");
+        data.set_running_to_inactive();
+
+        self
+    }
+}
+
+impl Scene for Scores {
+    fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene> {
+        println!("Scores");
+        data.set_running_to_inactive();
+
+        Box::new(Menu)
+    }
+}
+
+impl Scene for Exit {
+    fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene> {
+        let mut is_active: bool = true;
+        let mut next_state: Box<dyn Scene> = self;
+        let mut error_message = String::new();
+
+        while is_active {
+            clear_console!();
+            println!("Do you really wish to exit? [Y/n]");
+
+            display_notice(error_message.as_str());
 
             print!("> ");
             io::stdout()
@@ -47,45 +110,27 @@ impl Scene for Menu {
                 .expect("Error encountered when getting input!");
 
             // TODO change later
-            match MenuCommand::new(&buf) {
+            match ExitCommand::new(&buf) {
                 Ok(cmd) => {
                     match cmd {
-                        MenuCommand::Play => next_state = Box::new(Play),
-                        MenuCommand::Credits => next_state = Box::new(Credits),
-                        MenuCommand::Exit => next_state = Box::new(Exit),
+                        ExitCommand::DoExit => {
+                            if *data.has_played_once() {
+                                println!("Thank you for playing Word Jumble, bye!");
+                            } else {
+                                println!("Hope to see you soon!");
+                            }
+                            data.set_running_to_inactive();
+                        }
+                        ExitCommand::DontExit => {
+                            next_state = Box::new(Menu);
+                        }
                     }
-                    is_active = false
+                    is_active = false;
                 }
-                Err(e) => error_message = String::from(format!(": {}", e)),
+                Err(e) => error_message = String::from(format!("{}", e)),
             }
         }
 
         next_state
-    }
-}
-
-impl Scene for Play {
-    fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene> {
-        println!("Play");
-        data.set_running_to_inactive();
-
-        self
-    }
-}
-
-impl Scene for Credits {
-    fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene> {
-        println!("Credits");
-        data.set_running_to_inactive();
-
-        self
-    }
-}
-
-impl Scene for Exit {
-    fn handle(self: Box<Self>, data: &mut GameData) -> Box<dyn Scene> {
-        println!("Exit");
-        data.set_running_to_inactive();
-        self
     }
 }
