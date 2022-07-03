@@ -1,5 +1,3 @@
-use super::game::Game;
-
 pub struct PersistentData {
     is_running: bool,
     has_played_once: bool,

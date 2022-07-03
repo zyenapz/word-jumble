@@ -11,7 +11,7 @@ macro_rules! is_alphabetic {
     };
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Word {
     normal: String,
     jumbled: String,

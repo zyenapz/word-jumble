@@ -1,6 +1,6 @@
-use std::io;
+use std::{fmt::Display, io};
 
-use rand::RngCore;
+use rand::{distributions::Standard, prelude::Distribution, RngCore};
 
 use super::{
     theme_data::{WORDS_ANIMALS, WORDS_COUNTRIES, WORDS_FOOD, WORDS_SPACE, WORDS_WEBSITES},
@@ -14,6 +14,31 @@ pub(crate) enum Theme {
     Websites,
     Animals,
     Countries,
+}
+
+impl Distribution<Theme> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Theme {
+        match rng.gen_range(0..=4) {
+            0 => Theme::Space,
+            1 => Theme::Food,
+            2 => Theme::Websites,
+            3 => Theme::Animals,
+            4 => Theme::Countries,
+            _ => panic!("Error encountered when randomly choosing enum variants!"),
+        }
+    }
+}
+
+impl Display for Theme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Theme::Space => write!(f, "space"),
+            Theme::Food => write!(f, "food"),
+            Theme::Websites => write!(f, "websites"),
+            Theme::Animals => write!(f, "animals"),
+            Theme::Countries => write!(f, "countries"),
+        }
+    }
 }
 
 impl Theme {
