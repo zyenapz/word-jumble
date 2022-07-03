@@ -1,7 +1,7 @@
 use std::{
     io::{self, Write},
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use console::style;
@@ -47,6 +47,7 @@ macro_rules! display_prompt {
 }
 
 const MAX_RESHUFFLES: u8 = 2;
+const MAX_TIMELIMIT: u64 = 30;
 
 pub trait Scene {
     fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene>;
@@ -97,9 +98,7 @@ impl Scene for Menu {
 
 impl Scene for Play {
     fn handle(self: Box<Self>, data: &mut PersistentData) -> Box<dyn Scene> {
-        data.set_has_played_once_to_true();
-        clear_console!();
-
+        // Game session variables
         let next_state: Box<dyn Scene> = Box::new(Menu);
         let theme: Theme = rand::random();
 
@@ -113,16 +112,29 @@ impl Scene for Play {
         let mut is_running = true;
         let mut reshuffles_left = MAX_RESHUFFLES;
 
-        Self::display_instructions(theme.to_string().as_str());
+        // Set "has played once" variable to true
+        data.set_has_played_once_to_true();
 
+        // Display instructions
+        Self::display_instructions(theme.to_string().as_str());
+        clear_console!();
+
+        // Start timer
+        let mut timer = Instant::now();
+        const TIME_LIMIT: Duration = Duration::from_secs(MAX_TIMELIMIT);
+
+        // Game loop
         while is_running {
+            // Check if game is over
             if cur_q >= questions.len() {
                 is_running = false;
             }
 
+            // Clear input and console
             clear_console!();
             answer.clear();
 
+            // Print question and other relevant information
             println!(
                 "| {} | {} | {} |. \n(Q{} of {}). Unjumble this word: {}",
                 style(format!("Theme: {}", theme)).cyan(),
@@ -134,6 +146,8 @@ impl Scene for Play {
             );
 
             println!();
+
+            // Get player's input
             display_notice(&notice_msg);
 
             display_prompt!();
@@ -144,12 +158,18 @@ impl Scene for Play {
 
             let fmt_answer = answer.trim().to_lowercase();
 
+            // Process player's input
             if let Some(c) = fmt_answer.chars().next() {
                 if "/" == c.to_string().as_str() {
+                    // Match commands
                     match fmt_answer.as_str() {
                         "/t" | "/time" | "/timer" => {
-                            // todo!();
-                            // Add a timer functionality
+                            match TIME_LIMIT.checked_sub(timer.elapsed()) {
+                                Some(t) => {
+                                    notice_msg = format!("Remaining time is {}s", t.as_secs())
+                                }
+                                None => notice_msg = format!("You have run out of time! No score will be granted for this question now."),
+                            }
                         }
                         "/r" | "/reshuffle" | "/shuffle" => {
                             if reshuffles_left != 0 {
@@ -176,27 +196,44 @@ impl Scene for Play {
                         _ => notice_msg = format!("\'{}\' is an invalid command!", fmt_answer),
                     }
                 } else {
-                    if !fmt_answer.is_empty() {
-                        if fmt_answer.as_str() == questions[cur_q].get_normal_form().to_lowercase()
-                        {
-                            println!("{}", style("\nCorrect!").green());
-                            thread::sleep(Duration::from_secs(2));
-                            score += 1;
-                            cur_q += 1;
-                        } else {
-                            let msg = format!(
-                                "\nWrong! Correct answer is \'{}\'",
-                                questions[cur_q].get_normal_form()
-                            );
-                            println!("{}", style(msg).red());
-                            thread::sleep(Duration::from_secs(2));
-                            cur_q += 1;
-                        }
+                    // Check if there is time left, first
+                    if let Some(_) = TIME_LIMIT.checked_sub(timer.elapsed()) {
+                        if !fmt_answer.is_empty() {
+                            // Then match non-commands
 
-                        reshuffles_left = MAX_RESHUFFLES; // reset reshuffles
-                        notice_msg.clear();
+                            if fmt_answer.as_str()
+                                == questions[cur_q].get_normal_form().to_lowercase()
+                            {
+                                println!("{}", style("\nCorrect!").green());
+                                thread::sleep(Duration::from_secs(2));
+                                score += 1;
+                                cur_q += 1;
+                            } else {
+                                let msg = format!(
+                                    "\nWrong! Correct answer is \'{}\'",
+                                    questions[cur_q].get_normal_form()
+                                );
+                                println!("{}", style(msg).red());
+                                thread::sleep(Duration::from_secs(2));
+                                cur_q += 1;
+                            }
+
+                            // Reset some game variables
+                            reshuffles_left = MAX_RESHUFFLES;
+                            notice_msg.clear();
+                            timer = Instant::now();
+                        } else {
+                            notice_msg = "Cannot accept empty answers!".to_string()
+                        }
                     } else {
-                        notice_msg = "Cannot accept empty answers!".to_string()
+                        println!("{}", style("No time left, no points granted.").on_red());
+                        thread::sleep(Duration::from_secs(2));
+                        cur_q += 1;
+
+                        // Reset some game variables
+                        reshuffles_left = MAX_RESHUFFLES;
+                        notice_msg.clear();
+                        timer = Instant::now();
                     }
                 }
             } else {
