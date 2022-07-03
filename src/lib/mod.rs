@@ -1,7 +1,11 @@
 pub mod command;
+pub mod console_macros;
 pub mod game;
 pub mod persistent_data;
 pub mod scene;
+pub mod scene_exit;
+pub mod scene_menu;
+pub mod scene_play;
 pub mod theme;
 pub mod theme_data;
 pub mod word;
