@@ -145,10 +145,10 @@ impl Scene for Play {
             let fmt_answer = answer.trim().to_lowercase();
 
             if let Some(c) = fmt_answer.chars().next() {
-                if let "/" = c.to_string().as_str() {
+                if "/" == c.to_string().as_str() {
                     match fmt_answer.as_str() {
                         "/t" | "/time" | "/timer" => {
-                            todo!();
+                            // todo!();
                             // Add a timer functionality
                         }
                         "/r" | "/reshuffle" | "/shuffle" => {
@@ -176,9 +176,8 @@ impl Scene for Play {
                         _ => notice_msg = format!("\'{}\' is an invalid command!", fmt_answer),
                     }
                 } else {
-                    if let true = !fmt_answer.is_empty() {
-                        if let true =
-                            fmt_answer.as_str() == questions[cur_q].get_normal_form().to_lowercase()
+                    if !fmt_answer.is_empty() {
+                        if fmt_answer.as_str() == questions[cur_q].get_normal_form().to_lowercase()
                         {
                             println!("{}", style("\nCorrect!").green());
                             thread::sleep(Duration::from_secs(2));
@@ -210,6 +209,7 @@ impl Scene for Play {
         println!("Game over! You got {} out of {}!", score, questions.len());
         thread::sleep(Duration::from_secs(2));
         pause_console!(b"Press [Return] to go back to Menu...");
+        pause_console!(b"");
 
         next_state
     }
@@ -268,6 +268,7 @@ impl Play {
         thread::sleep(Duration::from_secs(1));
         pause_console!(b""); // adding this here because rust is reading the input too darn fast and i'm too lazy to find a non-hacky fix kek
         pause_console!(b"Press [Return] to start!\n");
+        pause_console!(b"");
     }
 }
 
